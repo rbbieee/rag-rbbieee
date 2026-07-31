@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    background-color: #09090b;
+    color: #f4f4f5;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Minimal Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #27272a;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3f3f46;
+}
+
+/* Studio Divider Lines & Minimal Cards */
+.studio-card {
+  background: #121215;
+  border: 1px solid #1f1f23;
+  border-radius: 12px;
+}
+
+.studio-card-active {
+  background: #18181c;
+  border-color: #ff3b30;
+}
+
+.studio-input {
+  background: #0d0d0f;
+  border: 1px solid #27272a;
+  color: #f4f4f5;
+  border-radius: 8px;
+  transition: border-color 0.15s ease;
+}
+
+.studio-input:focus {
+  outline: none;
+  border-color: #ff3b30;
+}
+
+/* Studio Range Slider */
+input[type="range"] {
+  accent-color: #ff3b30;
+}
