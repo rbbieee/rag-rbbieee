@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { PRESET_DOCUMENTS } from '../utils/mockData';
 import { Scissors, Sliders, FileText, ArrowRight, Layers, Copy, Check } from 'lucide-react';
+import Tooltip from './Tooltip';
 
 export default function Step1Chunking({
   documentText,
@@ -38,11 +39,11 @@ export default function Step1Chunking({
                 Step 01
               </span>
               <h2 className="text-xl font-bold text-white tracking-tight">
-                Document Chunking & Tokenization
+                Document <Tooltip term="Chunking" explanation="Splitting a long document into smaller segments so each piece fits within an embedding model's input window.">Chunking</Tooltip> & <Tooltip term="Tokenization" explanation="Breaking text into individual words or sub-words that the model processes as discrete units.">Tokenization</Tooltip>
               </h2>
             </div>
             <p className="text-xs text-slate-400 max-w-2xl leading-relaxed">
-              Split text documents into precise chunks for vector embedding without exceeding LLM context limits.
+              Split text documents into precise chunks for vector embedding without exceeding <Tooltip term="Context Limits" explanation="The maximum number of tokens an LLM can read in a single prompt, typically 4K to 128K tokens.">context limits</Tooltip>.
             </p>
           </div>
 
@@ -110,7 +111,7 @@ export default function Step1Chunking({
           <div className="apple-glass-card p-5 rounded-2xl space-y-5">
             <div className="flex items-center space-x-2 text-xs font-semibold text-white border-b border-white/[0.06] pb-3">
               <Sliders className="w-4 h-4 text-[#ff3b30]" />
-              <span>Hyperparameter Tuning</span>
+              <Tooltip term="Hyperparameters" explanation="Adjustable settings like chunk size and overlap that control how the text is split before embedding."><span>Hyperparameter Tuning</span></Tooltip>
             </div>
 
             {/* Chunk Size Slider */}
@@ -135,7 +136,7 @@ export default function Step1Chunking({
             {/* Chunk Overlap Slider */}
             <div className="space-y-2">
               <div className="flex justify-between text-xs">
-                <span className="text-slate-300 font-medium">Chunk Overlap</span>
+                <span className="text-slate-300 font-medium"><Tooltip term="Chunk Overlap" explanation="The number of characters shared between consecutive chunks. Overlap preserves context at chunk boundaries so important sentences are not cut in half.">Chunk Overlap</Tooltip></span>
                 <span className="font-mono text-amber-400 font-bold bg-white/5 px-2 py-0.5 rounded-md border border-white/10">
                   {overlap} chars
                 </span>
