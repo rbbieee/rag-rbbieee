@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import VectorCanvas2D from './VectorCanvas2D';
+import VectorCanvas3D from './VectorCanvas3D';
 import { PRESET_QUERIES } from '../utils/mockData';
-import { Target, Search, Sliders, ArrowRight, Calculator, Trophy } from 'lucide-react';
+import { generateEmbedding, projectTo3D } from '../utils/ragEngine';
+import { Search, ArrowRight, Trophy, Box, Layers } from 'lucide-react';
+import Tooltip from './Tooltip';
 
 export default function Step3VectorSearch({
   query,
@@ -16,7 +19,21 @@ export default function Step3VectorSearch({
   setSelectedChunkIndex,
   onNextStep
 }) {
+  const [viewMode, setViewMode] = useState('3d'); // '2d' | '3d'
   const topKIndices = searchResults.slice(0, topK).map((r) => r.chunkIdx);
+
+  // Compute 3D Coordinates for Three.js Visualization
+  const chunk3DCoords = useMemo(() => {
+    return chunks.map((c, idx) => {
+      const emb = generateEmbedding(c.text, 8);
+      return projectTo3D(emb, idx, chunks.length);
+    });
+  }, [chunks]);
+
+  const query3DCoord = useMemo(() => {
+    const qEmb = generateEmbedding(query, 8);
+    return projectTo3D(qEmb, 99, 100);
+  }, [query]);
 
   return (
     <div className="space-y-6">
@@ -28,11 +45,11 @@ export default function Step3VectorSearch({
               Step 03
             </span>
             <h2 className="text-xl font-bold text-white tracking-tight">
-              Vector Search & Cosine Similarity
+              Vector Search & <Tooltip term="Cosine Similarity" explanation="A metric that measures the angle between two vectors. A score of 1.0 means identical direction (perfect match), 0 means unrelated.">Cosine Similarity</Tooltip>
             </h2>
           </div>
           <p className="text-xs text-slate-400 max-w-2xl leading-relaxed">
-            Calculate Cosine Similarity between the query vector and document chunk vectors to retrieve the Top-K relevant context.
+            Calculate cosine similarity between the query vector and document chunk vectors to retrieve the <Tooltip term="Top-K" explanation="The K highest-scoring chunks selected as relevant context. A higher K includes more context but may add noise.">Top-K</Tooltip> relevant context.
           </p>
         </div>
 
@@ -52,7 +69,7 @@ export default function Step3VectorSearch({
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column: Query Bar & Vector Canvas */}
+        {/* Left Column: Query Bar & Vector Canvas (2D/3D) */}
         <div className="lg:col-span-6 space-y-5">
           {/* Apple Search Bar Card */}
           <div className="apple-glass-card p-5 rounded-2xl space-y-4">
@@ -61,9 +78,28 @@ export default function Step3VectorSearch({
                 <Search className="w-4 h-4 text-[#ff3b30]" />
                 User Query
               </label>
-              <span className="text-[11px] font-mono text-slate-500">
-                Live Embedding
-              </span>
+              
+              {/* 2D / 3D Canvas View Toggle Pill */}
+              <div className="flex items-center space-x-1 apple-segmented p-1">
+                <button
+                  onClick={() => setViewMode('2d')}
+                  className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all flex items-center space-x-1 ${
+                    viewMode === '2d' ? 'bg-[#ff3b30] text-white shadow-sm' : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <Layers className="w-3 h-3" />
+                  <span>2D Canvas</span>
+                </button>
+                <button
+                  onClick={() => setViewMode('3d')}
+                  className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all flex items-center space-x-1 ${
+                    viewMode === '3d' ? 'bg-[#ff3b30] text-white shadow-sm' : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <Box className="w-3 h-3" />
+                  <span>3D Three.js</span>
+                </button>
+              </div>
             </div>
 
             <div className="relative">
@@ -79,7 +115,9 @@ export default function Step3VectorSearch({
 
             {/* Top-K Segmented Pill */}
             <div className="flex items-center justify-between pt-1">
-              <span className="text-xs text-slate-400 font-medium">Top-K Retrieved Context:</span>
+              <span className="text-xs text-slate-400 font-medium">
+                <Tooltip term="Top-K" explanation="The number of most similar chunks retrieved from the vector database to use as grounding context for the LLM.">Top-K Retrieved Context</Tooltip>:
+              </span>
               <div className="flex items-center space-x-1.5 apple-segmented p-1">
                 {[1, 2, 3, 4, 5].map((num) => (
                   <button
@@ -98,15 +136,26 @@ export default function Step3VectorSearch({
             </div>
           </div>
 
-          {/* Vector Canvas 2D */}
-          <VectorCanvas2D
-            chunks={chunks}
-            chunkCoords={chunkCoords}
-            queryCoord={queryCoord}
-            topKIndices={topKIndices}
-            selectedChunkIndex={selectedChunkIndex}
-            setSelectedChunkIndex={setSelectedChunkIndex}
-          />
+          {/* Vector Canvas 2D or 3D */}
+          {viewMode === '3d' ? (
+            <VectorCanvas3D
+              chunks={chunks}
+              chunk3DCoords={chunk3DCoords}
+              query3DCoord={query3DCoord}
+              topKIndices={topKIndices}
+              selectedChunkIndex={selectedChunkIndex}
+              setSelectedChunkIndex={setSelectedChunkIndex}
+            />
+          ) : (
+            <VectorCanvas2D
+              chunks={chunks}
+              chunkCoords={chunkCoords}
+              queryCoord={queryCoord}
+              topKIndices={topKIndices}
+              selectedChunkIndex={selectedChunkIndex}
+              setSelectedChunkIndex={setSelectedChunkIndex}
+            />
+          )}
         </div>
 
         {/* Right Column: Search Results Ranking */}
