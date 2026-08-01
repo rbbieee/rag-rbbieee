@@ -2,6 +2,7 @@ import React from 'react';
 import VectorCanvas2D from './VectorCanvas2D';
 import { PRESET_QUERIES } from '../utils/mockData';
 import { Target, Search, Sliders, ArrowRight, Calculator, Trophy } from 'lucide-react';
+import Tooltip from './Tooltip';
 
 export default function Step3VectorSearch({
   query,
@@ -28,11 +29,11 @@ export default function Step3VectorSearch({
               Step 03
             </span>
             <h2 className="text-xl font-bold text-white tracking-tight">
-              Vector Search & Cosine Similarity
+              Vector Search & <Tooltip term="Cosine Similarity" explanation="A metric that measures the angle between two vectors. A score of 1.0 means identical direction (perfect match), 0 means unrelated.">Cosine Similarity</Tooltip>
             </h2>
           </div>
           <p className="text-xs text-slate-400 max-w-2xl leading-relaxed">
-            Calculate Cosine Similarity between the query vector and document chunk vectors to retrieve the Top-K relevant context.
+            Calculate cosine similarity between the query vector and document chunk vectors to retrieve the <Tooltip term="Top-K" explanation="The K highest-scoring chunks selected as relevant context. A higher K includes more context but may add noise.">Top-K</Tooltip> relevant context.
           </p>
         </div>
 
@@ -79,7 +80,7 @@ export default function Step3VectorSearch({
 
             {/* Top-K Segmented Pill */}
             <div className="flex items-center justify-between pt-1">
-              <span className="text-xs text-slate-400 font-medium">Top-K Retrieved Context:</span>
+              <span className="text-xs text-slate-400 font-medium"><Tooltip term="Top-K" explanation="The number of most similar chunks retrieved from the vector database to use as grounding context for the LLM.">Top-K Retrieved Context</Tooltip>:</span>
               <div className="flex items-center space-x-1.5 apple-segmented p-1">
                 {[1, 2, 3, 4, 5].map((num) => (
                   <button

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FileText, Terminal, ArrowRight, Copy, Check, MessageSquare, ShieldAlert } from 'lucide-react';
+import Tooltip from './Tooltip';
 
 export default function Step4PromptAssembly({
   systemPrompt,
@@ -31,11 +32,11 @@ export default function Step4PromptAssembly({
               Step 04
             </span>
             <h2 className="text-xl font-bold text-white tracking-tight">
-              Context Injection & Prompt Assembly
+              <Tooltip term="Context Injection" explanation="Inserting retrieved text chunks directly into the prompt so the LLM can reference verified source material instead of guessing.">Context Injection</Tooltip> & <Tooltip term="Prompt Assembly" explanation="Combining the system instruction, retrieved context, and user query into a single structured payload that the LLM reads.">Prompt Assembly</Tooltip>
             </h2>
           </div>
           <p className="text-xs text-slate-400 max-w-2xl leading-relaxed">
-            Retrieved context chunks are dynamically injected into the LLM prompt template as verified grounding data.
+            Retrieved context chunks are dynamically injected into the LLM prompt template as verified <Tooltip term="Grounding" explanation="Anchoring the LLM's response to factual source documents, reducing hallucinations and improving accuracy.">grounding</Tooltip> data.
           </p>
         </div>
 
