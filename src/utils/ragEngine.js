@@ -131,6 +131,28 @@ export function projectTo2D(vector, index, total) {
 }
 
 /**
+ * Projects 8-D vector to 3-D coordinates for Three.js Vector Space Canvas
+ */
+export function projectTo3D(vector, index, total) {
+  if (!vector || vector.length < 3) return { x: 0, y: 0, z: 0 };
+
+  let x = vector[0] * 0.7 + vector[3] * 0.4 - vector[6] * 0.3;
+  let y = vector[1] * 0.7 - vector[4] * 0.5 + vector[7] * 0.4;
+  let z = vector[2] * 0.7 - vector[5] * 0.5 + vector[0] * 0.3;
+
+  const phi = (index / Math.max(1, total)) * Math.PI * 2;
+  x += Math.cos(phi) * 0.15;
+  y += Math.sin(phi) * 0.15;
+  z += Math.cos(phi * 2) * 0.1;
+
+  return {
+    x: parseFloat(Math.max(-1, Math.min(1, x)).toFixed(3)),
+    y: parseFloat(Math.max(-1, Math.min(1, y)).toFixed(3)),
+    z: parseFloat(Math.max(-1, Math.min(1, z)).toFixed(3))
+  };
+}
+
+/**
  * Step 4: Build Augmented Prompt
  */
 export function buildAugmentedPrompt(systemPrompt, retrievedChunks, userQuery) {
