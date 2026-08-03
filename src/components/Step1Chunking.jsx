@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { PRESET_DOCUMENTS } from '../utils/mockData';
-import { Scissors, Sliders, FileText, ArrowRight, Layers, Copy, Check } from 'lucide-react';
+import { Sliders, FileText, ArrowRight, Layers, Copy, Check, GitCommit } from 'lucide-react';
+import Tooltip from './Tooltip';
 
 export default function Step1Chunking({
   documentText,
@@ -9,6 +10,8 @@ export default function Step1Chunking({
   setChunkSize,
   overlap,
   setOverlap,
+  strategy = 'fixed',
+  setStrategy,
   chunks,
   onNextStep
 }) {
@@ -38,11 +41,11 @@ export default function Step1Chunking({
                 Step 01
               </span>
               <h2 className="text-xl font-bold text-white tracking-tight">
-                Document Chunking & Tokenization
+                Document <Tooltip term="Chunking" explanation="Splitting a long document into smaller segments so each piece fits within an embedding model's input window.">Chunking</Tooltip> & <Tooltip term="Tokenization" explanation="Breaking text into individual words or sub-words that the model processes as discrete units.">Tokenization</Tooltip>
               </h2>
             </div>
             <p className="text-xs text-slate-400 max-w-2xl leading-relaxed">
-              Split text documents into precise chunks for vector embedding without exceeding LLM context limits.
+              Split text documents into precise chunks for vector embedding without exceeding <Tooltip term="Context Limits" explanation="The maximum number of tokens an LLM can read in a single prompt, typically 4K to 128K tokens.">context limits</Tooltip>.
             </p>
           </div>
 
@@ -76,8 +79,8 @@ export default function Step1Chunking({
             <p className="text-lg font-bold font-mono text-[#ff3b30] mt-0.5">~{totalTokens}</p>
           </div>
           <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/[0.06]">
-            <span className="text-[11px] text-slate-400 font-medium">Target Size</span>
-            <p className="text-lg font-bold font-mono text-slate-200 mt-0.5">{chunkSize} chars</p>
+            <span className="text-[11px] text-slate-400 font-medium">Active Strategy</span>
+            <p className="text-xs font-bold font-mono text-slate-200 mt-1 capitalize">{strategy} Chunking</p>
           </div>
         </div>
       </div>
@@ -106,50 +109,103 @@ export default function Step1Chunking({
             />
           </div>
 
-          {/* Sliders Control Card */}
+          {/* Strategy & Sliders Control Card */}
           <div className="apple-glass-card p-5 rounded-2xl space-y-5">
-            <div className="flex items-center space-x-2 text-xs font-semibold text-white border-b border-white/[0.06] pb-3">
-              <Sliders className="w-4 h-4 text-[#ff3b30]" />
-              <span>Hyperparameter Tuning</span>
+            <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
+              <div className="flex items-center space-x-2 text-xs font-semibold text-white">
+                <Sliders className="w-4 h-4 text-[#ff3b30]" />
+                <Tooltip term="Hyperparameters" explanation="Adjustable settings like chunk size, overlap, and strategy that control how the text is split before embedding."><span>Hyperparameter Tuning</span></Tooltip>
+              </div>
             </div>
 
-            {/* Chunk Size Slider */}
+            {/* Chunking Strategy Selector */}
             <div className="space-y-2">
-              <div className="flex justify-between text-xs">
-                <span className="text-slate-300 font-medium">Chunk Size (Target Length)</span>
-                <span className="font-mono text-[#ff3b30] font-bold bg-white/5 px-2 py-0.5 rounded-md border border-white/10">
-                  {chunkSize} chars
-                </span>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-300 font-medium">Chunking Strategy:</span>
+                <span className="text-[11px] font-mono text-slate-400 capitalize">{strategy} mode</span>
               </div>
-              <input
-                type="range"
-                min="60"
-                max="500"
-                step="10"
-                value={chunkSize}
-                onChange={(e) => setChunkSize(Number(e.target.value))}
-                className="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#ff3b30]"
-              />
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  onClick={() => setStrategy('fixed')}
+                  className={`py-2 px-3 rounded-xl text-xs font-medium border transition-all text-center ${
+                    strategy === 'fixed'
+                      ? 'bg-[#ff3b30] text-white border-[#ff3b30] shadow-sm font-semibold'
+                      : 'bg-white/[0.04] text-slate-300 border-white/[0.08] hover:bg-white/[0.08]'
+                  }`}
+                >
+                  Fixed-Size
+                </button>
+                <button
+                  onClick={() => setStrategy('sentence')}
+                  className={`py-2 px-3 rounded-xl text-xs font-medium border transition-all text-center ${
+                    strategy === 'sentence'
+                      ? 'bg-[#ff3b30] text-white border-[#ff3b30] shadow-sm font-semibold'
+                      : 'bg-white/[0.04] text-slate-300 border-white/[0.08] hover:bg-white/[0.08]'
+                  }`}
+                >
+                  Sentence
+                </button>
+                <button
+                  onClick={() => setStrategy('paragraph')}
+                  className={`py-2 px-3 rounded-xl text-xs font-medium border transition-all text-center ${
+                    strategy === 'paragraph'
+                      ? 'bg-[#ff3b30] text-white border-[#ff3b30] shadow-sm font-semibold'
+                      : 'bg-white/[0.04] text-slate-300 border-white/[0.08] hover:bg-white/[0.08]'
+                  }`}
+                >
+                  Paragraph
+                </button>
+              </div>
+              <p className="text-[11px] text-slate-400 pt-1 leading-relaxed">
+                {strategy === 'fixed' && 'Splits text into fixed character windows with custom overlap.'}
+                {strategy === 'sentence' && 'Splits at sentence boundaries (.!?) to avoid cutting sentences in half.'}
+                {strategy === 'paragraph' && 'Splits text per paragraph block (blank line breaks).'}
+              </p>
             </div>
 
-            {/* Chunk Overlap Slider */}
-            <div className="space-y-2">
-              <div className="flex justify-between text-xs">
-                <span className="text-slate-300 font-medium">Chunk Overlap</span>
-                <span className="font-mono text-amber-400 font-bold bg-white/5 px-2 py-0.5 rounded-md border border-white/10">
-                  {overlap} chars
-                </span>
+            {/* Chunk Size Slider (active for fixed & sentence) */}
+            {strategy !== 'paragraph' && (
+              <div className="space-y-2 pt-2 border-t border-white/[0.04]">
+                <div className="flex justify-between text-xs">
+                  <span className="text-slate-300 font-medium">Chunk Size (Target Length)</span>
+                  <span className="font-mono text-[#ff3b30] font-bold bg-white/5 px-2 py-0.5 rounded-md border border-white/10">
+                    {chunkSize} chars
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="60"
+                  max="500"
+                  step="10"
+                  value={chunkSize}
+                  onChange={(e) => setChunkSize(Number(e.target.value))}
+                  className="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#ff3b30]"
+                />
               </div>
-              <input
-                type="range"
-                min="0"
-                max={Math.min(150, Math.floor(chunkSize * 0.5))}
-                step="5"
-                value={overlap}
-                onChange={(e) => setOverlap(Number(e.target.value))}
-                className="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-amber-500"
-              />
-            </div>
+            )}
+
+            {/* Chunk Overlap Slider (active for fixed mode) */}
+            {strategy === 'fixed' && (
+              <div className="space-y-2">
+                <div className="flex justify-between text-xs">
+                  <span className="text-slate-300 font-medium">
+                    <Tooltip term="Chunk Overlap" explanation="The number of characters shared between consecutive chunks. Overlap preserves context at chunk boundaries so important sentences are not cut in half.">Chunk Overlap</Tooltip>
+                  </span>
+                  <span className="font-mono text-amber-400 font-bold bg-white/5 px-2 py-0.5 rounded-md border border-white/10">
+                    {overlap} chars
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max={Math.min(150, Math.floor(chunkSize * 0.5))}
+                  step="5"
+                  value={overlap}
+                  onChange={(e) => setOverlap(Number(e.target.value))}
+                  className="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-amber-500"
+                />
+              </div>
+            )}
           </div>
         </div>
 
@@ -159,7 +215,7 @@ export default function Step1Chunking({
             <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
               <div className="flex items-center space-x-2">
                 <Layers className="w-4 h-4 text-[#ff3b30]" />
-                <h3 className="text-xs font-semibold text-white">Generated Chunks</h3>
+                <h3 className="text-xs font-semibold text-white">Generated Chunks ({strategy})</h3>
               </div>
               <span className="text-[11px] font-mono text-slate-500">
                 {chunks.length} Items
