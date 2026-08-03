@@ -30,6 +30,7 @@ export default function App() {
   const [documentText, setDocumentText] = useState(PRESET_DOCUMENTS[0].content);
   const [chunkSize, setChunkSize] = useState(180);
   const [overlap, setOverlap] = useState(30);
+  const [strategy, setStrategy] = useState('fixed'); // 'fixed' | 'sentence' | 'paragraph'
 
   const [query, setQuery] = useState(PRESET_QUERIES[0]);
   const [topK, setTopK] = useState(3);
@@ -42,8 +43,8 @@ export default function App() {
 
   // 1. Chunking computation
   const chunks = useMemo(() => {
-    return chunkText(documentText, chunkSize, overlap);
-  }, [documentText, chunkSize, overlap]);
+    return chunkText(documentText, chunkSize, overlap, strategy);
+  }, [documentText, chunkSize, overlap, strategy]);
 
   // 2. Dense Vector Embeddings matrix computation
   const embeddings = useMemo(() => {
@@ -115,6 +116,8 @@ export default function App() {
                 setChunkSize={setChunkSize}
                 overlap={overlap}
                 setOverlap={setOverlap}
+                strategy={strategy}
+                setStrategy={setStrategy}
                 chunks={chunks}
                 onNextStep={() => setCurrentStep(2)}
               />

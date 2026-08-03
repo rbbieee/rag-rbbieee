@@ -13,11 +13,93 @@ export function tokenize(text) {
 }
 
 /**
- * Step 1: Chunk text with customizable size and overlap
+ * Step 1: Chunk text with customizable size, overlap, and strategy
+ * Strategies: 'fixed' | 'sentence' | 'paragraph'
  */
-export function chunkText(text, chunkSize = 180, overlap = 30) {
+export function chunkText(text, chunkSize = 180, overlap = 30, strategy = 'fixed') {
   if (!text || text.trim().length === 0) return [];
 
+  // Strategy 1: Paragraph-based splitting
+  if (strategy === 'paragraph') {
+    const rawParagraphs = text.split(/\n\s*\n/).map(p => p.trim()).filter(p => p.length > 0);
+    const chunks = [];
+    let chunkId = 1;
+    let currentChar = 0;
+
+    rawParagraphs.forEach((para) => {
+      const tokens = tokenize(para);
+      const startChar = text.indexOf(para, currentChar);
+      const endChar = startChar >= 0 ? startChar + para.length : currentChar + para.length;
+      if (startChar >= 0) currentChar = endChar;
+
+      chunks.push({
+        id: `chunk-${chunkId}`,
+        index: chunkId,
+        text: para,
+        charCount: para.length,
+        tokenCount: tokens.length,
+        startChar: startChar >= 0 ? startChar : 0,
+        endChar: endChar,
+      });
+      chunkId++;
+    });
+    return chunks;
+  }
+
+  // Strategy 2: Sentence-based splitting
+  if (strategy === 'sentence') {
+    const sentences = text.match(/[^.!?]+[.!?]+(\s+|$)|[^.!?]+$/g) || [text];
+    const chunks = [];
+    let chunkId = 1;
+    let currentChunkText = '';
+    let currentStartChar = 0;
+    let charTracker = 0;
+
+    sentences.forEach((sentence) => {
+      const trimmedSentence = sentence.trim();
+      if (!trimmedSentence) return;
+
+      const sentenceStart = text.indexOf(trimmedSentence, charTracker);
+      if (sentenceStart >= 0) charTracker = sentenceStart + trimmedSentence.length;
+
+      if ((currentChunkText + ' ' + trimmedSentence).trim().length > chunkSize && currentChunkText.length > 0) {
+        const tokens = tokenize(currentChunkText);
+        chunks.push({
+          id: `chunk-${chunkId}`,
+          index: chunkId,
+          text: currentChunkText.trim(),
+          charCount: currentChunkText.trim().length,
+          tokenCount: tokens.length,
+          startChar: currentStartChar,
+          endChar: currentStartChar + currentChunkText.trim().length,
+        });
+        chunkId++;
+        currentChunkText = trimmedSentence;
+        currentStartChar = sentenceStart >= 0 ? sentenceStart : 0;
+      } else {
+        if (currentChunkText.length === 0) {
+          currentStartChar = sentenceStart >= 0 ? sentenceStart : 0;
+        }
+        currentChunkText = currentChunkText ? `${currentChunkText} ${trimmedSentence}` : trimmedSentence;
+      }
+    });
+
+    if (currentChunkText.trim().length > 0) {
+      const tokens = tokenize(currentChunkText);
+      chunks.push({
+        id: `chunk-${chunkId}`,
+        index: chunkId,
+        text: currentChunkText.trim(),
+        charCount: currentChunkText.trim().length,
+        tokenCount: tokens.length,
+        startChar: currentStartChar,
+        endChar: currentStartChar + currentChunkText.trim().length,
+      });
+    }
+    return chunks;
+  }
+
+  // Strategy 3 (Default): Fixed-size character window + overlap
   const chunks = [];
   let startIndex = 0;
   let chunkId = 1;
