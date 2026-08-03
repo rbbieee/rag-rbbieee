@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from './components/Navbar';
 import StepProgress from './components/StepProgress';
 import Step1Chunking from './components/Step1Chunking';
@@ -17,11 +18,19 @@ import {
   buildAugmentedPrompt
 } from './utils/ragEngine';
 
+const stepTransition = {
+  initial: { opacity: 0, y: 16 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -12 },
+  transition: { duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }
+};
+
 export default function App() {
   const [currentStep, setCurrentStep] = useState(1);
   const [documentText, setDocumentText] = useState(PRESET_DOCUMENTS[0].content);
   const [chunkSize, setChunkSize] = useState(180);
   const [overlap, setOverlap] = useState(30);
+  const [strategy, setStrategy] = useState('fixed'); // 'fixed' | 'sentence' | 'paragraph'
 
   const [query, setQuery] = useState(PRESET_QUERIES[0]);
   const [topK, setTopK] = useState(3);
@@ -34,8 +43,8 @@ export default function App() {
 
   // 1. Chunking computation
   const chunks = useMemo(() => {
-    return chunkText(documentText, chunkSize, overlap);
-  }, [documentText, chunkSize, overlap]);
+    return chunkText(documentText, chunkSize, overlap, strategy);
+  }, [documentText, chunkSize, overlap, strategy]);
 
   // 2. Dense Vector Embeddings matrix computation
   const embeddings = useMemo(() => {
@@ -95,63 +104,77 @@ export default function App() {
       {/* Interactive 5-Step Progress Stepper */}
       <StepProgress currentStep={currentStep} setStep={setCurrentStep} />
 
-      {/* Main Pipeline Content */}
+      {/* Main Pipeline Content with Animated Transitions */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {currentStep === 1 && (
-          <Step1Chunking
-            documentText={documentText}
-            setDocumentText={setDocumentText}
-            chunkSize={chunkSize}
-            setChunkSize={setChunkSize}
-            overlap={overlap}
-            setOverlap={setOverlap}
-            chunks={chunks}
-            onNextStep={() => setCurrentStep(2)}
-          />
-        )}
+        <AnimatePresence mode="wait">
+          {currentStep === 1 && (
+            <motion.div key="step-1" {...stepTransition}>
+              <Step1Chunking
+                documentText={documentText}
+                setDocumentText={setDocumentText}
+                chunkSize={chunkSize}
+                setChunkSize={setChunkSize}
+                overlap={overlap}
+                setOverlap={setOverlap}
+                strategy={strategy}
+                setStrategy={setStrategy}
+                chunks={chunks}
+                onNextStep={() => setCurrentStep(2)}
+              />
+            </motion.div>
+          )}
 
-        {currentStep === 2 && (
-          <Step2Embedding
-            chunks={chunks}
-            embeddings={embeddings}
-            onNextStep={() => setCurrentStep(3)}
-          />
-        )}
+          {currentStep === 2 && (
+            <motion.div key="step-2" {...stepTransition}>
+              <Step2Embedding
+                chunks={chunks}
+                embeddings={embeddings}
+                onNextStep={() => setCurrentStep(3)}
+              />
+            </motion.div>
+          )}
 
-        {currentStep === 3 && (
-          <Step3VectorSearch
-            query={query}
-            setQuery={setQuery}
-            topK={topK}
-            setTopK={setTopK}
-            chunks={chunks}
-            chunkCoords={chunkCoords}
-            queryCoord={queryCoord}
-            searchResults={searchResults}
-            selectedChunkIndex={selectedChunkIndex}
-            setSelectedChunkIndex={setSelectedChunkIndex}
-            onNextStep={() => setCurrentStep(4)}
-          />
-        )}
+          {currentStep === 3 && (
+            <motion.div key="step-3" {...stepTransition}>
+              <Step3VectorSearch
+                query={query}
+                setQuery={setQuery}
+                topK={topK}
+                setTopK={setTopK}
+                chunks={chunks}
+                chunkCoords={chunkCoords}
+                queryCoord={queryCoord}
+                searchResults={searchResults}
+                selectedChunkIndex={selectedChunkIndex}
+                setSelectedChunkIndex={setSelectedChunkIndex}
+                onNextStep={() => setCurrentStep(4)}
+              />
+            </motion.div>
+          )}
 
-        {currentStep === 4 && (
-          <Step4PromptAssembly
-            systemPrompt={systemPrompt}
-            setSystemPrompt={setSystemPrompt}
-            retrievedChunks={retrievedChunks}
-            query={query}
-            augmentedPrompt={augmentedPrompt}
-            onNextStep={() => setCurrentStep(5)}
-          />
-        )}
+          {currentStep === 4 && (
+            <motion.div key="step-4" {...stepTransition}>
+              <Step4PromptAssembly
+                systemPrompt={systemPrompt}
+                setSystemPrompt={setSystemPrompt}
+                retrievedChunks={retrievedChunks}
+                query={query}
+                augmentedPrompt={augmentedPrompt}
+                onNextStep={() => setCurrentStep(5)}
+              />
+            </motion.div>
+          )}
 
-        {currentStep === 5 && (
-          <Step5LLMGeneration
-            retrievedChunks={retrievedChunks}
-            query={query}
-            onReset={handleReset}
-          />
-        )}
+          {currentStep === 5 && (
+            <motion.div key="step-5" {...stepTransition}>
+              <Step5LLMGeneration
+                retrievedChunks={retrievedChunks}
+                query={query}
+                onReset={handleReset}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
 
       {/* Footer */}
