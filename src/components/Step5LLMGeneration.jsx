@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Cpu, CheckCircle2, RotateCcw, BookOpen, AlertTriangle, Sparkles } from 'lucide-react';
 import { generateSimulatedLLMResponse } from '../utils/ragEngine';
+import Tooltip from './Tooltip';
 
 export default function Step5LLMGeneration({
   retrievedChunks,
@@ -41,11 +42,11 @@ export default function Step5LLMGeneration({
               Step 05
             </span>
             <h2 className="text-xl font-bold text-white tracking-tight">
-              Grounded LLM Response & Citations
+              <Tooltip term="Grounded Response" explanation="An LLM answer that is directly supported by retrieved source documents, not generated from memory alone.">Grounded LLM Response</Tooltip> & <Tooltip term="Citations" explanation="References linking each part of the answer back to the specific source chunk it came from, so you can verify accuracy.">Citations</Tooltip>
             </h2>
           </div>
           <p className="text-xs text-slate-400 max-w-2xl leading-relaxed">
-            The LLM model generates a grounded response using retrieved source documents complete with interactive citation chips.
+            The LLM model generates a grounded response using retrieved source documents complete with interactive <Tooltip term="Citation Chips" explanation="Clickable badges that highlight the exact source chunk used for each claim in the response.">citation chips</Tooltip>.
           </p>
         </div>
 

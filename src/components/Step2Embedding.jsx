@@ -1,5 +1,6 @@
 import React from 'react';
 import { Hash, ArrowRight, Activity, HelpCircle, Sparkles } from 'lucide-react';
+import Tooltip from './Tooltip';
 
 export default function Step2Embedding({ chunks, embeddings, onNextStep }) {
   // Apple HIG System Red alpha scaling
@@ -22,7 +23,7 @@ export default function Step2Embedding({ chunks, embeddings, onNextStep }) {
               Step 02
             </span>
             <h2 className="text-xl font-bold text-white tracking-tight">
-              Dense Vector Embedding Matrix
+              <Tooltip term="Dense Vector" explanation="A compact numerical array where every dimension holds a meaningful value, unlike sparse vectors where most values are zero.">Dense Vector</Tooltip> <Tooltip term="Embedding" explanation="A mathematical representation of text as a point in high-dimensional space, where similar meanings are placed closer together.">Embedding</Tooltip> Matrix
             </h2>
           </div>
           <p className="text-xs text-slate-400 max-w-2xl leading-relaxed">
@@ -33,7 +34,7 @@ export default function Step2Embedding({ chunks, embeddings, onNextStep }) {
         {/* L2 Norm Badge */}
         <div className="flex items-center space-x-3 px-3.5 py-2 rounded-xl bg-white/[0.06] border border-white/[0.08] font-mono text-xs text-slate-300">
           <Sparkles className="w-4 h-4 text-[#ff3b30]" />
-          <span>L2 Unit Vector (||V|| = 1.0)</span>
+          <span><Tooltip term="L2 Normalization" explanation="Scaling each vector so its total length equals 1.0. This ensures cosine similarity only measures the angle (direction) between vectors, not their magnitude.">L2 Unit Vector</Tooltip> (||V|| = 1.0)</span>
         </div>
       </div>
 
